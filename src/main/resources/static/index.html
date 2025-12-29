@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Milvus 文档管理与搜索</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h2 {
+            margin-top: 40px;
+        }
+        input, textarea, button {
+            margin: 6px 0;
+            padding: 6px;
+            width: 400px;
+        }
+        textarea {
+            height: 120px;
+        }
+        .section {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        pre {
+            background: #f6f6f6;
+            padding: 10px;
+            max-height: 300px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Milvus 文档服务测试页面</h1>
+
+<!-- 1. 导入文档 -->
+<div class="section">
+    <h2>1. 导入文档</h2>
+    <form id="importForm">
+        <input type="file" name="file" required /><br>
+        <input type="text" name="collectionName" placeholder="collectionName（默认 default）" /><br>
+        <label>
+            <input type="checkbox" name="extractImages" checked />
+            是否抽取图片（extractImages）
+        </label><br>
+        <button type="submit">导入</button>
+    </form>
+    <pre id="importResult"></pre>
+</div>
+
+<!-- 2. 文本搜索 -->
+<div class="section">
+    <h2>2. 文本搜索（GET）</h2>
+    <input id="searchQuery" placeholder="query" value="支付登记查询操作流程" /><br>
+    <input id="searchCollection" placeholder="collectionName" value="opdoc1" /><br>
+    <input id="searchTopK" type="number" value="10" /><br>
+    <button onclick="search()">搜索</button>
+    <pre id="searchResult"></pre>
+</div>
+
+<!-- 3. 混合搜索 -->
+<div class="section">
+    <h2>3. 混合搜索（POST JSON）</h2>
+    <textarea id="hybridJson">
+{
+  "query": "支付登记",
+  "collectionName": "opdoc1",
+  "topK": 5
+}
+    </textarea><br>
+    <button onclick="hybridSearch()">混合搜索</button>
+    <pre id="hybridResult"></pre>
+</div>
+
+<!-- 4. 创建集合 -->
+<div class="section">
+    <h2>4. 创建集合</h2>
+    <input id="createCollectionName" placeholder="collectionName" />
+    <button onclick="createCollection()">创建</button>
+    <pre id="createResult"></pre>
+</div>
+
+<!-- 5. 删除集合 -->
+<div class="section">
+    <h2>5. 删除集合</h2>
+    <input id="deleteCollectionName" placeholder="collectionName" />
+    <button onclick="deleteCollection()">删除</button>
+    <pre id="deleteResult"></pre>
+</div>
+
+<script>
+    const baseUrl = "/api/documents";
+
+    // 1. 导入文档
+    document.getElementById("importForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        // checkbox 未选中时不会提交，这里显式处理
+        if (!formData.has("extractImages")) {
+            formData.append("extractImages", "false");
+        }
+
+        fetch(baseUrl + "/import", {
+            method: "POST",
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("importResult").textContent =
+                    JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                document.getElementById("importResult").textContent = err;
+            });
+    });
+
+    // 2. 文本搜索
+    function search() {
+        const query = encodeURIComponent(document.getElementById("searchQuery").value);
+        const collectionName = encodeURIComponent(document.getElementById("searchCollection").value);
+        const topK = document.getElementById("searchTopK").value;
+
+        const url = `${baseUrl}/search?query=${query}&collectionName=${collectionName}&topK=${topK}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("searchResult").textContent =
+                    JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                document.getElementById("searchResult").textContent = err;
+            });
+    }
+
+    // 3. 混合搜索
+    function hybridSearch() {
+        const body = document.getElementById("hybridJson").value;
+
+        fetch(baseUrl + "/hybrid-search", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: body
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("hybridResult").textContent =
+                    JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                document.getElementById("hybridResult").textContent = err;
+            });
+    }
+
+    // 4. 创建集合
+    function createCollection() {
+        const name = document.getElementById("createCollectionName").value;
+
+        fetch(`${baseUrl}/collections/${name}`, {
+            method: "POST"
+        })
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("createResult").textContent = data;
+            })
+            .catch(err => {
+                document.getElementById("createResult").textContent = err;
+            });
+    }
+
+    // 5. 删除集合
+    function deleteCollection() {
+        const name = document.getElementById("deleteCollectionName").value;
+
+        fetch(`${baseUrl}/collections/${name}`, {
+            method: "DELETE"
+        })
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("deleteResult").textContent = data;
+            })
+            .catch(err => {
+                document.getElementById("deleteResult").textContent = err;
+            });
+    }
+</script>
+
+</body>
+</html>

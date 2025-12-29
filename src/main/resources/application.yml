@@ -1,0 +1,17 @@
+# 应用服务 WEB 访问端口
+server:
+  port: 8089
+
+#模型配置
+langchain4j:
+  community:
+    dashscope:
+      embedding-model:
+        model-name: text-embedding-v4
+        api-key: 
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
