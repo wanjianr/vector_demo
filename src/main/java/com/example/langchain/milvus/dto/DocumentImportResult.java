@@ -1,7 +1,8 @@
-package com.example.langchain.milvus.dto.response;
+package com.example.langchain.milvus.dto;
 
 import lombok.Builder;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
 

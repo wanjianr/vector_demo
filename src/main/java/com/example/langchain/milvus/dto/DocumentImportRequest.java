@@ -1,8 +1,9 @@
-package com.example.langchain.milvus.dto.request;
+package com.example.langchain.milvus.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Map;
 
 @Data

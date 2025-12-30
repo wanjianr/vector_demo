@@ -1,4 +1,4 @@
-package com.example.langchain.milvus.component;
+package com.example.langchain.milvus.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -27,10 +27,6 @@ public class ImageExtractorWithPosition {
         if (fileName.endsWith(".docx")) {
             return extractImagesFromDocx(file, outputDir);
         }
-//        else if (fileName.endsWith(".pdf")) {
-//            return extractImagesFromPdf(file, outputDir);
-//        }
-
         return Collections.emptyList();
     }
 
